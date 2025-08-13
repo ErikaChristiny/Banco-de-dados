@@ -1,0 +1,84 @@
+CREATE TABLE alunos (
+    id INT PRIMARY KEY,
+    nome VARCHAR(100),
+    curso VARCHAR(100)
+);
+
+CREATE TABLE livros (
+    id INT PRIMARY KEY,
+    titulo VARCHAR(150),
+    autor VARCHAR(100),
+    categoria VARCHAR(50)
+);
+
+CREATE TABLE emprestimos (
+    id INT PRIMARY KEY,
+    aluno_id INT,
+    livro_id INT,
+    data_emprestimo DATE,
+    data_devolucao DATE,
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id),
+    FOREIGN KEY (livro_id) REFERENCES livros(id)
+);
+ 
+insert into alunos values 
+(10, 'Isadora', 'Informática'),
+(11, 'Antônio', 'Edificações'),
+(12, 'Mariana', 'Contabilidade'),
+(13, 'Emilly', 'Informática');
+
+insert into livros values 
+(20, 'Lua Negra', 'Antônio Cirilo', 'Terror e suspense'),
+(21, 'Percy Jackson e os olimpianos', 'Rick Riordan', 'Fantasia e aventura'),
+(22, 'A Hipótese do amor', 'Ali Hazelwood', 'Romance e comédia'),
+(23, 'As Crônicas de Nárnia', 'C.S Lewis', 'Fantasia');
+
+insert into emprestimos values
+(30, 13, 21, '2025/06/02', null),
+(31, 11, 20, '2025/06/12', '2025/06/27'),
+(32, 12, 23, '2025/06/17', '2025/07/02'),
+(33, 10, 22, '2025/07/02',  null),
+(34, 12, 22, '2025/08/02', '2025/07/17'),
+(35, 10, 22, '2025/09/17', '2025/10/02'),
+(36, 11, 21, '2025/10/17', null);
+
+select a.id, a.nome,
+count(e.aluno_id) AS total_emprestimos
+from alunos a
+inner join emprestimos e on a.id = e.aluno_id
+GROUP BY e.aluno_id, a.nome
+order by a.nome DESC;
+
+select l.titulo, count(e.id) AS "Quantidade de vezes que foi emprestado"
+from livros l
+inner join emprestimos e on l.id = e.livro_id
+GROUP by l.titulo
+order by COUNT(e.id) DESC;
+
+select a.curso, COUNT(e.id) AS "emprestimos por curso"
+from emprestimos e
+join alunos a on a.id = e.aluno_id
+GROUP by a.curso
+order by count(e.id) DESC;
+
+select a.nome as "aluno", count(e.id) as "Aluno que mais emprestou livros"
+from emprestimos e 
+join alunos a on a.id = e.aluno_id
+GROUP by a.nome
+order by COUNT(e.id) DESC Limit 1;
+
+select  COUNT(l.titulo) As "livros que ainda não foram devolvidos", l.titulo AS "titulo das cópias", e.data_devolucao
+from livros l
+join emprestimos e on l.id = e.livro_id
+Where data_devolucao is null
+GROUP by l.titulo, e.data_devolucao
+order by COUNT(l.titulo) DESC;
+
+select COUNT(livro_id) / count(distinct aluno_id) AS "Média de livros emprestados por aluno"
+from emprestimos e;
+
+select Count( e.id) As "categoria de livros mais populares", l.categoria
+from emprestimos e 
+join livros l on e.livro_id = l.id
+GROUP by l.categoria
+order by Count( e.id) DESC;
