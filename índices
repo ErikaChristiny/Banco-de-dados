@@ -1,0 +1,53 @@
+create table ViagensServicos(
+    idpv varchar(1000),
+	NumProposta varchar(100),
+	situacao varchar(100),
+	ViagemUrgente varchar (100),
+    JustViagemUrgente varchar(1000),
+	CodOrgSuperior varchar (100)
+);
+ 
+
+COPY ViagensServicos FROM '/tmp/Viagem.csv'  WITH (
+    FORMAT csv, HEADER,DELIMITER ';',   ENCODING 'LATIN1'
+);
+
+
+explain analyse select * from ViagensServicos where NumProposta = '550714';
+
+create index ViagensServicos_idx on ViagensServicos(NumProposta);
+
+explain analyse select * from ViagensServicos where NumProposta = '550714';
+
+
+create table Pagamentos(
+    idpv varchar(100),
+	NumProposta varchar(100),
+	CodOrgSuperior varchar (100),
+	CodOrgPagador varchar (100),
+	NomeOrgPagador varchar(1000),
+	TipoPag varchar (100)
+);
+
+
+COPY Pagamentos FROM '/tmp/Pagamentos.csv' using delimiters ',' header;
+
+explain analyse select * from Pagamentos where CodOrgSuperior = '889595';
+
+create index Pagamentos_idx on Pagamentos(NumProposta);
+
+explain analyse select * from Pagamentos where CodOrgSuperior = '889595';
+
+
+explain analyse
+select 
+p.idpv,
+p.NumProposta,
+p.CodOrgSuperior,
+v.idpv,
+v.NumProposta,
+v.CodOrgSuperior
+From Pagamentos p
+LEFT join ViagensServicos v ON p.NumProposta = v.NumProposta;
+
+SELECT * FROM Pagamentos
